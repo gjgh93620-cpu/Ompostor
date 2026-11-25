@@ -14,6 +14,49 @@ namespace Impostor.Api.Innersloth
 
         private static readonly RNGCryptoServiceProvider Random = new RNGCryptoServiceProvider();
 
+        // 成品房间码池：6 位房间码会从这里随机选择
+        private static readonly string[] PresetCodes =
+        {
+            // 原有
+            "AMONGU",
+            "YOUSUS",
+            "POLUSS",
+            "WHEREE",
+            "SKELDD",
+            "ARSHIP",
+            "MIRAHQ",
+            "WHOWHO",
+            "SKIPPP",
+            "AUAUAU",
+
+            // 新增 Among Us 风格
+            "IMPOST", // impostor
+            "CREWMA", // crewmate
+            "VENTED", // vent
+            "SUSBOI", // sus
+            "SUSPCT", // suspicious
+            "TASKED", // task
+            "KILLER", // kill
+            "EJECTD", // eject
+            "SABOTE", // sabotage
+            "REACTR", // reactor
+            "OXYGEN", // O2
+            "MEDBAY", // medbay
+            "CAFETR", // cafeteria
+            "WEAPON", // weapons
+            "SHIELD", // shields
+            "COMMSS", // comms
+            "GHOSTY", // ghost
+            "SHAPES", // shapeshifter
+            "ENGINR", // engineer
+            "SCIENT", // scientist
+            "FUNGLE", // Fungle 地图
+            "SUBMER", // Submerged 地图
+            "TRUSTN", // trust
+            "LIARRR", // liar
+            "VOTEDD", // vote
+        };
+
         public static string IntToGameName(int input)
         {
             // V2.
@@ -61,7 +104,14 @@ namespace Impostor.Api.Innersloth
                 throw new ArgumentException("should be 4 or 6", nameof(len));
             }
 
-            // Generate random bytes.
+            // 6 位房间码：从成品房间码池中随机选择
+            if (len == 6)
+            {
+                var index = GetRandomIndex(PresetCodes.Length);
+                return GameNameToInt(PresetCodes[index]);
+            }
+
+            // 4 位房间码：保留原来的随机生成逻辑
 #if NETSTANDARD2_0
             var data = new byte[len];
 #else
@@ -81,6 +131,14 @@ namespace Impostor.Api.Innersloth
 #else
             return GameNameToInt(new string(dataChar));
 #endif
+        }
+
+        private static int GetRandomIndex(int maxExclusive)
+        {
+            var bytes = new byte[4];
+            Random.GetBytes(bytes);
+            var value = BitConverter.ToUInt32(bytes, 0);
+            return (int)(value % (uint)maxExclusive);
         }
 
         private static string IntToGameNameV2(int input)
